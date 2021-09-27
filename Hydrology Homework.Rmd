@@ -1,0 +1,62 @@
+---
+title: "Hydrology Homework"
+author: "Will Johnson"
+date: "9/25/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+pacman::p_load(tidyverse, cowplot, kableExtra)
+flow_data <- read_csv("hydrologyhwdata.csv")
+```
+
+The following data was used to calculate flow at the three cross sections. No time values were provided for the Deer Creek pygmy meter measurements, so it was assumed that all counts were taken over 40 seconds.
+
+```{r, echo=FALSE}
+kbl(flow_data, booktabs = T, linesep = "") %>% 
+  kable_styling(latex_options = "hold_position", bootstrap_options = "striped")
+```
+
+
+Calculating discharge:
+$$Q_n = V_n * w_n *d_n$$ 
+where
+$$w_n = \frac{l_n-l_{n-1}}{2} + \frac{l_{n+1}-l_n}{2}$$
+and
+$$V_n=0.9604 *\frac{rev}{sec}+0.0312$$
+
+```{r}
+flow_data <- flow_data %>% 
+  group_by(Site) %>% 
+  mutate(Position = as.integer(Position)) %>% 
+  mutate(final_position = max(Position)) %>% 
+  mutate(`width (m)` = case_when(`Position` == final_position ~ 
+                                   (`Distance (m)` - lag(`Distance (m)`))/2,
+                                 `Position` == 1 ~ 
+                                   (lead(`Distance (m)` ) - `Distance (m)`)/2,
+                                 TRUE ~ 
+                                   (`Distance (m)` - lag(`Distance (m)`))/2 + 
+                                   (lead(`Distance (m)` ) - `Distance (m)`)/2)) %>% 
+  mutate(`Velocity (ft/s)` = 0.9604*(Revolutions / `Time (s)`) + 0.0312) %>% 
+  mutate(`width (ft)` = `width (m)` * 3.281) %>% 
+  mutate(`discharge (ft^3/s)` = `Velocity (ft/s)`*`width (ft)`*`Depth (ft)`) %>% 
+  summarise(`discharge (ft^3/s)` = sum(`discharge (ft^3/s)`)) %>% 
+  mutate(`discharge (ft^3/s)` = round(`discharge (ft^3/s)`, 2))
+```
+```{r, echo = FALSE}
+kbl(flow_data, booktabs = T, linesep = "") %>% 
+  kable_styling(latex_options = "hold_position", bootstrap_options = "striped")
+```
+1. According to these calculations, total discharge above the confluence was $4.00 ft^3/s$, a full $3.63 ft^3/s$ lower than the value measured downstream of the confluence. One reason for this discrepancy could be inaccuracies in measurement---the USGS recommends 25-30 measurements while 3-7 were used here. Snake River may also be a gaining stream, although the contribution from groundwater would likely be minimal over the distances between the sampling sites. 
+
+
+```{r, echo = FALSE}
+flow_data <- flow_data %>% 
+  mutate(stream_position = ifelse(Site == "Confluence", "Below Confluence", "Above Confluence"))
+
+ggplot(data = flow_data, aes(x = stream_position, y = `discharge (ft^3/s)`, fill = Site)) +
+  geom_bar(stat = "identity") + theme_cowplot() + scale_fill_viridis_d() + labs(x = "Position")
+```
+
+2. The measurements taken on the USGS stream gauge range from $28.5$ to $30.4 ft^3/s$
