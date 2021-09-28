@@ -105,7 +105,7 @@ ggplot(data = peak_stream_flow, aes(x = Date,
   y = `Peak Stream Flow (ft^3/s)`, color = Site)) + geom_point() + geom_line() +
   scale_color_viridis_d() + theme_cowplot()
 ```
-```{r}
+```{r, fig.cap = c("Stream network of Boulder Creek Watershed")}
 knitr::include_graphics("Boulder_Creek_Annotated.pdf")
 ```
 

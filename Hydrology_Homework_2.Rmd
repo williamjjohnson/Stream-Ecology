@@ -105,7 +105,10 @@ ggplot(data = peak_stream_flow, aes(x = Date,
   y = `Peak Stream Flow (ft^3/s)`, color = Site)) + geom_point() + geom_line() +
   scale_color_viridis_d() + theme_cowplot()
 ```
-```{r}
+4. The following is a stream network map of the Boulder Creek Watershed.
+```{r, fig.cap = "Stream network of Boulder Creek Watershed (Barnes et al., 2012)"}
 knitr::include_graphics("Boulder_Creek_Annotated.pdf")
 ```
 
+
+Barnes, R.T., Smith, R.L., Aiken, G.R., 2012. Linkages between denitrification and dissolved organic matter quality, Boulder Creek watershed, Colorado: DENITRIFICATION AND DOM QUALITY. J. Geophys. Res. 117. https://doi.org/10.1029/2011JG001749

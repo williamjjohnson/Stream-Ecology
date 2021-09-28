@@ -1,0 +1,23 @@
+"0","flow_data <- flow_data %>% 
+  group_by(Site) %>% 
+  mutate(Position = as.integer(Position)) %>% 
+  mutate(final_position = max(Position)) %>% 
+  mutate(`width (m)` = case_when(`Position` == final_position ~ 
+                                   (`Distance (m)` - lag(`Distance (m)`))/2,
+                                 `Position` == 1 ~ 
+                                   (lead(`Distance (m)` ) - `Distance (m)`)/2,
+                                 TRUE ~ 
+                                   (`Distance (m)` - lag(`Distance (m)`))/2 + 
+                                   (lead(`Distance (m)` ) - `Distance (m)`)/2)) %>% 
+  mutate(`Velocity (ft/s)` = 0.9604*(Revolutions / `Time (s)`) + 0.0312) %>% 
+  mutate(`width (ft)` = `width (m)` * 3.281) %>% 
+  mutate(`discharge (ft^3/s)` = `Velocity (ft/s)`*`width (ft)`*`Depth (ft)`) %>% 
+  summarise(`discharge (ft^3/s)` = sum(`discharge (ft^3/s)`)) %>% 
+  mutate(`discharge (ft^3/s)` = round(`discharge (ft^3/s)`, 2))
+"
+"2","Error: Problem with `mutate()` column `Position`.
+[34mℹ[39m `Position = as.integer(Position)`.
+[31mx[39m cannot coerce type 'environment' to vector of type 'integer'
+[34mℹ[39m The error occurred in group 1: Site = ""Confluence"".
+[90mRun `rlang::last_error()` to see where the error occurred.[39m
+"
